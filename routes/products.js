@@ -23,15 +23,3 @@ productsRouter.put("/:id/edit", editPerson);
 productsRouter.delete("/:id", deactivePerson);
 
 export default productsRouter;
-
-app.post("/registerTenant", (req, res) => {
-  const { hostname } = req.body;
-  registerTenant(hostname, req.body);
-  // registrar un usuario cliente en la base de datos con nombre ${hostname}
-});
-app.post("/loginTenant", (req, res) => {
-  const { hostname } = req.body;
-  loginTenant(hostname, req.body);
-
-  // logear un usuario cliente en la base de datos con nombre ${hostname}
-});

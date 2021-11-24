@@ -1,49 +1,27 @@
-import connection from "../db/connection";
+const model = require("../models");
+const User = require("../models/User");
 
-export const registerUser = (req, res) => {
-  const { nombre, email, password, tipo, documento, domain } = req.body;
-  connection.query(
-    `USE SAAS ; INSERT INTO USERS (nombre,email,password) VALUES( ? , ? , ?); 
-    INSERT INTO HOSTNAMES (fqdn) VALUES (?);
-    CREATE DATABASE ? ;
-    USE ? ;
-    CREATE TABLE PRODUCTS {
-        id: int NOT NULL AUTO_INCREMENT,
-        precio : int not null,
-        nombre : varchar(50) not null,
-        descripcion : varchar(50) not null,
-        PRIMARY_KEY (id)
-    };
-    CREATE TABLE USERS {
-        id: int NOT NULL AUTO_INCREMENT,
-        nombre : varchar(50) not null,
-        email : varchar(50) not nullnull,
-        tipo : varchar(50) not null,
-        documento : varchar(50) not null,
-        password : varchar(50) not null,
-        PRIMARY_KEY(id)
-    };
-    INSERT INTO USERS (nombre,email,tipo,documento,password) VALUES(? ,? ,? ,? ,?)
-    `,
-    [
-      (nombre,
-      email,
-      password,
-      domain,
-      domain,
-      domain,
+
+exports.registerUser = async function (req, res) {
+  const { nombre, email, password, tipo, documento, domain, hostname } = req.body;
+  if (domain.includes("localhost")) {
+    const user = await model.User.create({
       nombre,
       email,
       tipo,
+      contraseña: password,
       documento,
-      password),
-    ],
-    function (err, results) {
-      console.log(results);
-    }
-  );
+    })
+    const tenant = await model.Tenant.create({
+      hostname
+    })
+    await user.addTenant([tenant, 1]);
+  }
+  res.send("ok")
 };
 
+
+/*
 export const loginUser = (req, res) => {
   const { email, password, domain } = req.body;
   connection.query(
@@ -58,7 +36,7 @@ export const loginUser = (req, res) => {
       res.send("Error de logeo");
     }
   );
-};
+}; */
 
 // export const register = (hostname) => {
 //   connection.query(
