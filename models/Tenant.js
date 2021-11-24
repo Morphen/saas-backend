@@ -1,47 +1,23 @@
-import Sequelize from "sequelize";
-export default function (sequelize, DataTypes) {
-  return sequelize.define(
-    "user",
+module.exports = (sequelize, DataTypes) => {
+  const Tenant = sequelize.define("Tenant",
     {
-      id_user: {
-        autoIncrement: true,
-        type: DataTypes.BIGINT.UNSIGNED,
-        allowNull: false,
-        primaryKey: true,
-      },
-      nombre: {
+      hostname: {
         type: DataTypes.STRING(191),
         allowNull: false,
-      },
-      email: {
-        type: DataTypes.STRING(191),
-        allowNull: false,
-      },
-      tipo: {
-        type: DataTypes.STRING(191),
-        allowNull: true,
-      },
-      contraseña: {
-        type: DataTypes.STRING(191),
-        allowNull: false,
-      },
-      documento: {
-        type: DataTypes.STRING(191),
-        allowNull: true,
       },
     },
-    {
-      sequelize,
-      tableName: "user",
-      timestamps: false,
-      indexes: [
-        {
-          name: "PRIMARY",
-          unique: true,
-          using: "BTREE",
-          fields: [{ name: "id_user" }],
-        },
-      ],
+  )
+
+  Tenant.associate = models => {
+
+    Tenant.associate = models => {
+      Tenant.belongsToMany(models.User, { through: 'User_Tenant' });
     }
-  );
+    
+    Tenant.hasMany(models.Product, {
+      onDelete: "cascade"
+    });
+  }
+
+  return Tenant;
 }
