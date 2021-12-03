@@ -1,12 +1,14 @@
 const express = require("express");
 
 //import controaldor
-const { loginUser, registerUser } = require("../controllers/userController.js")
+const { loginUser, registerUser } = require("../controllers/userController.js");
+const { tenantExist } = require("../middlewares/tenantExist.js");
+const { userExist } = require("../middlewares/userExist.js");
 
 const usersRouter = express.Router();
 
-/* usersRouter.get("/login", loginUser);
- */
-usersRouter.post("/register", registerUser);
+usersRouter.post("/login", loginUser);
+ 
+usersRouter.post("/register", userExist, registerUser);
 
 module.exports = usersRouter;
