@@ -1,71 +1,78 @@
-import connection from "../db/connection";
+const bcrypt = require("bcrypt");
+const model = require("../models");
+const jwt = require("jsonwebtoken");
+const tenantServices = require("../services/tenantServices")
+const userServices = require("../services/userServices")
 
-export const registerUser = (req, res) => {
-  const { nombre, email, password, tipo, documento, domain } = req.body;
-  connection.query(
-    `USE SAAS ; INSERT INTO USERS (nombre,email,password) VALUES( ? , ? , ?); 
-    INSERT INTO HOSTNAMES (fqdn) VALUES (?);
-    CREATE DATABASE ? ;
-    USE ? ;
-    CREATE TABLE PRODUCTS {
-        id: int NOT NULL AUTO_INCREMENT,
-        precio : int not null,
-        nombre : varchar(50) not null,
-        descripcion : varchar(50) not null,
-        PRIMARY_KEY (id)
-    };
-    CREATE TABLE USERS {
-        id: int NOT NULL AUTO_INCREMENT,
-        nombre : varchar(50) not null,
-        email : varchar(50) not nullnull,
-        tipo : varchar(50) not null,
-        documento : varchar(50) not null,
-        password : varchar(50) not null,
-        PRIMARY_KEY(id)
-    };
-    INSERT INTO USERS (nombre,email,tipo,documento,password) VALUES(? ,? ,? ,? ,?)
-    `,
-    [
-      (nombre,
-      email,
-      password,
-      domain,
-      domain,
-      domain,
-      nombre,
-      email,
-      tipo,
-      documento,
-      password),
-    ],
-    function (err, results) {
-      console.log(results);
+
+exports.registerUser = async function (req, res) {
+  const { nombre, email, password, tipo, documento, domain, hostname } = req.body;
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  if (domain === "localhost") {
+    const tenantTemp = await tenantServices.findTenantByHostname(hostname);
+
+    if (!tenantTemp) {
+      const user = await model.User.create({
+        nombre,
+        email,
+        tipo,
+        password: hashedPassword,
+        documento,
+        rol:"admin"
+      })
+
+      const tenant = await model.Tenant.create({
+        hostname
+      })
+
+      await user.addTenant([tenant, 1]);
+      res.send(user)
+    } else {
+      res.status(400).send("El tenant ya existe aa");
     }
-  );
+  } else {
+    const tenantTemp = await tenantServices.findTenantByDomain(domain)
+
+    if (tenantTemp) {
+      const user = await model.User.create({
+        nombre,
+        email,
+        tipo,
+        password: hashedPassword,
+        documento,
+        rol:"usuario"
+      })
+
+      await user.addTenant([tenantTemp]);
+
+      res.send(user)
+    } else {
+      res.status(400).send("El tenant no existe");
+    }
+  }
 };
 
-export const loginUser = (req, res) => {
+exports.loginUser = async (req, res) => {
   const { email, password, domain } = req.body;
-  connection.query(
-    "USE SAAS ; SELECT * FROM USERS WHERE email = ?",
-    [email],
-    function (err, results) {
-      const user = results[0];
-      if (user.password === password) {
-        res.send("logeo existoso como usuario dueño de dominio");
-      }
-      res.status(400);
-      res.send("Error de logeo");
+  const user = await userServices.findUserByEmailTenant(email, domain);
+  if (user) {
+    const realPassword = user.dataValues.password;
+    if (await bcrypt.compare(password, realPassword)) {
+      const accessToken = generateAccessToken(email);
+      res.send({ JWT: accessToken });
+    } else {
+      res.send("contraseña incorrecta");
     }
-  );
+  } else res.send("Usuario incorrecto");
 };
 
-// export const register = (hostname) => {
-//   connection.query(
-//     "CREATE DATABASE ? ; USE ? ; INSERT INTO",
-//     [hostname, hostname],
-//     function (err, results) {
-//       console.log(results);
-//     }
-//   );
-// };
+const generateAccessToken = (email) => {
+  return jwt.sign(
+    {
+      exp: Math.floor(Date.now() / 1000) + 60 * 60,
+      data: email,
+    },
+    "process.env.TOKEN_ADMIN"
+  );
+};
