@@ -1,25 +1,24 @@
-import express from "express";
-import { registerTenant, loginTenant } from "../controllers/userController";
+const express = require("express");
 
 //import controaldor
-import {
-  getPersons,
-  postPerson,
-  getSinglePerson,
-  editPerson,
-  deactivePerson,
-} from "../controllers/personController.js";
-//import isAuth from "../middlewares/isAuth.js";
+const {
+  addProduct,
+  getProduct,
+  getProducts,
+  editProduct,
+  deleteProduct
+} = require("../controllers/productController.js");
+
 const productsRouter = express.Router();
 
-productsRouter.get("/", getPersons);
+productsRouter.get("/", getProducts);
 
-productsRouter.post("/", postPerson);
+productsRouter.post("/", addProduct);
 
-productsRouter.get("/:id", getSinglePerson);
+productsRouter.get("/:id", getProduct);
 
-productsRouter.put("/:id/edit", editPerson);
+productsRouter.put("/:id/edit", editProduct);
 
-productsRouter.delete("/:id", deactivePerson);
+productsRouter.delete("/:id", deleteProduct);
 
-export default productsRouter;
+module.exports = productsRouter;

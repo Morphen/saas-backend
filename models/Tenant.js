@@ -7,17 +7,16 @@ module.exports = (sequelize, DataTypes) => {
       },
       estado: {
         type: DataTypes.BOOLEAN,
-        default: true
+        defaultValue: true
       },
     },
   )
 
   Tenant.associate = models => {
 
-    Tenant.associate = models => {
-      Tenant.belongsToMany(models.User, { through: 'User_Tenant' });
-    }
-    
+    Tenant.belongsToMany(models.User, { through: 'User_Tenant' });
+
+
     Tenant.hasMany(models.Product, {
       onDelete: "cascade"
     });

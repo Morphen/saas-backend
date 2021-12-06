@@ -18,12 +18,22 @@ module.exports = (sequelize, DataTypes) => {
     documento: {
       type: DataTypes.STRING(191)
     },
+    rol: {
+      type: DataTypes.STRING(191),
+      allowNull: false,
+    }
   },
   )
 
   User.associate = models => {
     User.belongsToMany(models.Tenant, { through: 'User_Tenant' });
+
+    User.hasMany(models.Venta, {
+      onDelete: "cascade"
+    });
   }
+
+  
 
   return User;
 }

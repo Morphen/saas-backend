@@ -1,9 +1,9 @@
-const express = require("express")
-const cors = require("cors")
-const db = require("./models")
-// import productsRouter from "./routes/products.js";
+const express = require("express");
+const cors = require("cors");
+const db = require("./models");
+const productsRouter = require("./routes/products.js");
 const usersRouter = require("./routes/users");
-// import usersTenancyRouter from "./routes/usersTenancy.js";
+const ventasRouter = require("./routes/ventas");
 
 const app = express();
 const PORT = 3000 || process.env.PORT;
@@ -14,9 +14,9 @@ app.use(express.json());
 app.use(cors());
 
 //Routes
-// app.use(API + "/usersTenancy", usersTenancyRouter);
-app.use("/users", usersRouter);
-// app.use(API + "/products", productsRouter);
+app.use("/api/users", usersRouter);
+app.use("/api/products", productsRouter);
+app.use("/api/compras", ventasRouter)
 
 
 db.sequelize.sync().then(() => {

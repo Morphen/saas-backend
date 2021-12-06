@@ -1,6 +1,8 @@
 const bcrypt = require("bcrypt");
 const model = require("../models");
 const jwt = require("jsonwebtoken");
+const tenantServices = require("../services/tenantServices")
+const userServices = require("../services/userServices")
 
 
 exports.registerUser = async function (req, res) {
@@ -8,11 +10,8 @@ exports.registerUser = async function (req, res) {
   const hashedPassword = await bcrypt.hash(password, 10);
 
   if (domain === "localhost") {
-    const tenantTemp = await model.Tenant.findOne({
-      where: {
-        hostname
-      }
-    });
+    const tenantTemp = await tenantServices.findTenantByHostname(hostname);
+
     if (!tenantTemp) {
       const user = await model.User.create({
         nombre,
@@ -20,6 +19,7 @@ exports.registerUser = async function (req, res) {
         tipo,
         password: hashedPassword,
         documento,
+        rol:"admin"
       })
 
       const tenant = await model.Tenant.create({
@@ -29,14 +29,11 @@ exports.registerUser = async function (req, res) {
       await user.addTenant([tenant, 1]);
       res.send(user)
     } else {
-      res.status(400).send("El tenant " + hostname + " ya existe");
+      res.status(400).send("El tenant ya existe aa");
     }
   } else {
-    const tenantTemp = await model.Tenant.findOne({
-      where: {
-        hostname: domain
-      }
-    });
+    const tenantTemp = await tenantServices.findTenantByDomain(domain)
+
     if (tenantTemp) {
       const user = await model.User.create({
         nombre,
@@ -44,6 +41,7 @@ exports.registerUser = async function (req, res) {
         tipo,
         password: hashedPassword,
         documento,
+        rol:"usuario"
       })
 
       await user.addTenant([tenantTemp]);
@@ -57,26 +55,16 @@ exports.registerUser = async function (req, res) {
 
 exports.loginUser = async (req, res) => {
   const { email, password, domain } = req.body;
-  const response = await model.User.findOne({
-    include: {
-      model: model.Tenant,
-      where: {
-        hostname: domain
-      }
-    },
-    where: {
-      email
-    }
-  });
-  if (response) {
-    const realPassword = response.dataValues.password;
+  const user = await userServices.findUserByEmailTenant(email, domain);
+  if (user) {
+    const realPassword = user.dataValues.password;
     if (await bcrypt.compare(password, realPassword)) {
       const accessToken = generateAccessToken(email);
       res.send({ JWT: accessToken });
     } else {
       res.send("contraseña incorrecta");
     }
-  }else res.send("Usuario incorrecto");
+  } else res.send("Usuario incorrecto");
 };
 
 const generateAccessToken = (email) => {
