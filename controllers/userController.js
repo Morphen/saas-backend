@@ -1,12 +1,12 @@
 const bcrypt = require("bcrypt");
 const model = require("../models");
 const jwt = require("jsonwebtoken");
-const tenantServices = require("../services/tenantServices")
-const userServices = require("../services/userServices")
-
+const tenantServices = require("../services/tenantServices");
+const userServices = require("../services/userServices");
 
 exports.registerUser = async function (req, res) {
-  const { nombre, email, password, tipo, documento, domain, hostname } = req.body;
+  const { nombre, email, password, tipo, documento, domain, hostname } =
+    req.body;
   const hashedPassword = await bcrypt.hash(password, 10);
 
   if (domain === "localhost") {
@@ -19,20 +19,20 @@ exports.registerUser = async function (req, res) {
         tipo,
         password: hashedPassword,
         documento,
-        rol:"admin"
-      })
+        rol: "admin",
+      });
 
       const tenant = await model.Tenant.create({
-        hostname
-      })
+        hostname,
+      });
 
       await user.addTenant([tenant, 1]);
-      res.send(user)
+      res.send(user);
     } else {
       res.status(400).send("El tenant ya existe aa");
     }
   } else {
-    const tenantTemp = await tenantServices.findTenantByDomain(domain)
+    const tenantTemp = await tenantServices.findTenantByDomain(domain);
 
     if (tenantTemp) {
       const user = await model.User.create({
@@ -41,12 +41,12 @@ exports.registerUser = async function (req, res) {
         tipo,
         password: hashedPassword,
         documento,
-        rol:"usuario"
-      })
+        rol: "usuario",
+      });
 
       await user.addTenant([tenantTemp]);
 
-      res.send(user)
+      res.send(user);
     } else {
       res.status(400).send("El tenant no existe");
     }
