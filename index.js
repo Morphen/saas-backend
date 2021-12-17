@@ -4,6 +4,7 @@ const db = require("./models");
 const productsRouter = require("./routes/products.js");
 const usersRouter = require("./routes/users");
 const ventasRouter = require("./routes/ventas");
+const tenantRouter = require("./routes/tenant");
 
 const app = express();
 const PORT = 3000 || process.env.PORT;
@@ -16,12 +17,11 @@ app.use(cors());
 //Routes
 app.use("/api/users", usersRouter);
 app.use("/api/products", productsRouter);
-app.use("/api/compras", ventasRouter)
-
+app.use("/api/compras", ventasRouter);
+app.use("/api/tenant", tenantRouter);
 
 db.sequelize.sync().then(() => {
   app.listen(PORT, () => {
     console.log(`app listening at http://localhost:${PORT}`);
   });
-})
-
+});
