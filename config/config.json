@@ -1,7 +1,7 @@
 {
   "development": {
-    "username": "root",
-    "password": null,
+    "username": "saas",
+    "password": "saas",
     "database": "saas",
     "host": "localhost",
     "dialect": "mysql",

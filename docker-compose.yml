@@ -1,0 +1,17 @@
+version: "3.9"
+services:
+  mysql:
+    container_name: saas
+    image: mysql
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql-docker/tmp/mysql:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: "saas"
+      MYSQL_USER: "saas"
+      MYSQL_PASSWORD: "saas"
+      MYSQL_ROOT_PASSWORD: "root"
+      # MYSQL_ALLOW_EMPTY_PASSWORD: 'true'
+      # MYSQL_RANDOM_ROOT_PASSWORD: 'root'
+    restart: unless-stopped
