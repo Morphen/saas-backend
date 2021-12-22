@@ -3,7 +3,7 @@ const tenantServices = require("../services/tenantServices");
 const productServices = require("../services/productServices");
 
 exports.addProduct = async (req, res) => {
-  const { nombre, descripcion, price, domain } = req.body;
+  const { nombre, descripcion, price, domain, stock, imagen } = req.body;
   const tenantTemp = await tenantServices.findTenantByDomain(domain);
 
   if (tenantTemp) {
@@ -13,7 +13,8 @@ exports.addProduct = async (req, res) => {
         nombre,
         descripcion,
         price,
-        Tenant: domain,
+        stock,
+        imagen,
       },
     });
     if (created) {
