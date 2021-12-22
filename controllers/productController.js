@@ -53,12 +53,12 @@ exports.editProduct = async (req, res) => {
 
 exports.deleteProduct = async (req, res) => {
   const id = req.params.id;
-  if (await productServices.findProductInTenant(id, req.body.domain)) {
-    await model.Product.destroy(req.body, {
-      where: {
-        id: id,
-      },
-    });
+  const product = await productServices.findProductInTenant(
+    id,
+    req.body.domain
+  );
+  if (product) {
+    await product.destroy();
     res.send("producto eliminado con exito");
   } else res.status(400).send("no existe el producto");
 };
