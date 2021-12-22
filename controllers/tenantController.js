@@ -9,3 +9,5 @@ exports.getTenants = async (req, res) => {
   });
   res.send(tenant);
 };
+
+exports.editTenants = async (req, res) => {};
